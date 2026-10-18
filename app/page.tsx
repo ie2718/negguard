@@ -1,127 +1,220 @@
-"use client";
+import { HeroPreview } from "@/components/hero-preview";
+import { UploadZone } from "@/components/upload-zone";
+import { btnPrimary, btnSecondary } from "@/components/button-styles";
 
-import { useCallback, useState } from "react";
-import { useRouter } from "next/navigation";
+const PAINS = [
+  "Auto / Broad 开了很久，却很少认真看 Search Term Report",
+  "ACOS 漂着，说不清钱花在哪些真实搜索词上",
+  "否词表很薄，或只凭感觉偶发否定",
+  "全托管太贵，只想先把漏水堵住",
+];
 
-const MAX_MB = 15;
+const TRUST = [
+  "月广告花费约 $1,500+",
+  "CSV / XLSX 即可",
+  "不必先开 Ads API",
+  "对照：全托管 PPC 常见 $500–$1,500+/月",
+];
+
+const STEPS = [
+  {
+    title: "上传报告",
+    body: "导出 Sponsored Products 的 Search Term Report（CSV 或 XLSX）并上传。",
+  },
+  {
+    title: "看疑似浪费",
+    body: "查看疑似浪费金额与否词建议（规则可解释）。",
+  },
+  {
+    title: "导出否词",
+    body: (
+      <>
+        导出 Keyword Text + Match Type（negativeExact），
+        <br />
+        在广告后台选广告活动导入。
+      </>
+    ),
+  },
+];
+
+const LIMITS = [
+  "不接 Amazon Ads API（首版 CSV 优先）",
+  "不做全托管 PPC、代改竞价",
+  "不保证 ACOS 降到某数字",
+  "不接刷单 / 灰产",
+];
+
+function Arrow() {
+  return (
+    <svg viewBox="0 0 16 16" aria-hidden className="size-4" fill="none">
+      <path
+        d="M3 8h10M9 4l4 4-4 4"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export default function HomePage() {
-  const router = useRouter();
-  const [dragging, setDragging] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [hint, setHint] = useState<string | null>(null);
-
-  const upload = useCallback(
-    async (file: File) => {
-      setError(null);
-      setHint(null);
-      if (!/\.(csv|xlsx)$/i.test(file.name)) {
-        setError("请上传 Search Term Report 的 .csv 或 .xlsx 文件");
-        return;
-      }
-      if (file.size > MAX_MB * 1024 * 1024) {
-        setError(`访客快检限 ≤${MAX_MB}MB。注册后可分析更大文件。`);
-        return;
-      }
-      setBusy(true);
-      try {
-        const fd = new FormData();
-        fd.append("file", file);
-        const res = await fetch("/api/upload", { method: "POST", body: fd });
-        const data = await res.json();
-        if (!res.ok) {
-          setError(data.error || "上传失败");
-          return;
-        }
-        if (data.missingRequired?.length) {
-          setHint(
-            "报告已接收，但缺少必填列，无法分析。"
-          );
-        }
-        router.push(`/uploads/${data.id}`);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "网络错误");
-      } finally {
-        setBusy(false);
-      }
-    },
-    [router]
-  );
-
-  const onDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setDragging(false);
-      const f = e.dataTransfer.files?.[0];
-      if (f) void upload(f);
-    },
-    [upload]
-  );
-
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-4 py-16">
-      <header className="space-y-2">
-        <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
-          NegGuard
-        </p>
-        <h1 className="text-3xl font-semibold tracking-tight">
-          找出广告里正在漏掉的搜索词
-        </h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
-          上传 Sponsored Products 的 Search Term Report（CSV 或 XLSX），估算疑似浪费金额，并导出可导入的否词表（Negative Exact）。
-        </p>
-        <p className="text-sm text-zinc-500">
-          访客快检：文件 ≤{MAX_MB}MB / ≤2 万行。完整分析与完整导出需注册 / 订阅。
-        </p>
-      </header>
+    <main id="main" className="flex-1">
+      <section className="mx-auto grid w-full max-w-[1120px] px-5 pb-6 pt-12 sm:pt-16 lg:grid-cols-2 lg:gap-x-16 lg:pt-20">
+        <div className="lg:col-start-1 lg:row-start-1">
+          <p className="text-sm font-medium text-brand">自助快检 · 不托管投放</p>
+          <h1 className="mt-3 max-w-xl text-[1.75rem] font-semibold leading-[1.28] tracking-[-0.02em] text-balance sm:text-4xl sm:leading-[1.2] lg:text-[2.65rem]">
+            你的亚马逊广告费，有一块正在「搜索词」里漏掉。
+          </h1>
+          <p className="mt-4 max-w-xl text-base leading-7 text-muted sm:text-lg">
+            上传 Sponsored Products 的 Search Term Report，几分钟内估算疑似浪费金额，导出可导入的 Negative Exact 否词表。不做全托管，不保证 ACOS——只交你能核对的清单。
+          </p>
 
-      <div
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={onDrop}
-        className={`rounded-2xl border-2 border-dashed p-12 text-center transition-colors ${
-          dragging
-            ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30"
-            : "border-zinc-300 dark:border-zinc-700"
-        }`}
-      >
-        <p className="mb-4 text-lg">
-          {busy ? "正在解析报告…" : "将报告（CSV / XLSX）拖到此处，或点击选择文件"}
-        </p>
-        <label className="inline-flex cursor-pointer items-center justify-center rounded-lg bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white">
-          {busy ? "处理中…" : "选择文件"}
-          <input
-            type="file"
-            accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            className="hidden"
-            disabled={busy}
-            onChange={(e) => {
-              const f = e.target.files?.[0];
-              if (f) void upload(f);
-              e.target.value = "";
-            }}
-          />
-        </label>
-      </div>
+          <div id="features" className="mt-8 scroll-mt-24 max-w-xl">
+            <h2 className="text-sm font-semibold">你是不是这样</h2>
+            <ul className="mt-3 space-y-2.5">
+              {PAINS.map((item) => (
+                <li key={item} className="flex gap-3 text-sm leading-6 text-muted">
+                  <span aria-hidden className="mt-2.5 h-px w-3 shrink-0 bg-brand" />
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-3 text-sm font-medium">以上 ≥2 条，NegGuard 就是为你准备的。</p>
+          </div>
 
-      {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200">
-          {error}
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <a href="#upload" className={btnPrimary}>
+              免费快检
+              <Arrow />
+            </a>
+            <a href="#pricing" className={btnSecondary}>
+              $29/月解锁完整导出
+            </a>
+          </div>
+
+          <ul className="mt-6 grid max-w-xl gap-x-6 gap-y-2 text-sm text-muted sm:grid-cols-2">
+            {TRUST.map((item) => (
+              <li key={item} className="flex items-center gap-2">
+                <span aria-hidden className="size-1.5 shrink-0 rounded-full bg-brand" />
+                {item}
+              </li>
+            ))}
+          </ul>
         </div>
-      )}
-      {hint && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
-          {hint}
-        </div>
-      )}
 
-      <footer className="text-xs text-zinc-500">
-        导出的否词表仅含 Negative Exact（Keyword Text + Match Type），不区分广告活动。建议先导入浪费最多的那个广告活动试用；如果某个词在其他活动里出过单，就别在那里否定。
-      </footer>
+        <div className="order-3 mt-10 lg:order-none lg:col-start-2 lg:row-start-1 lg:mt-0 lg:self-center">
+          <HeroPreview />
+        </div>
+
+        <div className="order-2 mt-12 lg:order-none lg:col-span-2 lg:row-start-2 lg:mt-16">
+          <UploadZone />
+        </div>
+      </section>
+
+      <section id="how" className="scroll-mt-24 pb-16 pt-4 sm:pb-20 sm:pt-8">
+        <div className="mx-auto w-full max-w-[1120px] px-5">
+          <p className="text-sm font-medium text-brand">怎么用</p>
+          <h2 className="mt-2 max-w-2xl text-2xl font-semibold tracking-tight sm:text-3xl">
+            三步，从报告到可导入否词表
+          </h2>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-muted sm:text-base">
+            你自己核对清单，再在广告后台导入。NegGuard 不代改竞价。
+          </p>
+          <ol className="mt-8 grid gap-4 md:grid-cols-3">
+            {STEPS.map((step, index) => (
+              <li key={step.title} className="rounded-2xl border border-line bg-card p-6 shadow-card">
+                <span aria-hidden className="font-mono text-sm text-brand">
+                  0{index + 1}
+                </span>
+                <h3 className="mt-4 text-base font-semibold">{step.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-muted">{step.body}</p>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-4 rounded-2xl border border-line bg-card px-5 py-4 text-sm leading-6 text-muted">
+            <span className="font-medium text-foreground">导入前提示。 </span>
+            导出表不区分广告活动；建议先导入浪费最多的那个活动试用。
+          </p>
+        </div>
+      </section>
+
+      <section id="pricing" className="scroll-mt-24 border-y border-line bg-card/70 py-16 sm:py-20">
+        <div className="mx-auto w-full max-w-[1120px] px-5">
+          <p className="text-sm font-medium text-brand">价格</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">免费快检，或 Pro $29/月</h2>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-muted sm:text-base">
+            只有这两档。不做 $79 档。不保证 ACOS / 销量结果。
+          </p>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-2">
+            <article className="flex h-full flex-col rounded-2xl border border-line bg-card p-6 shadow-card sm:p-8">
+              <h3 className="text-lg font-semibold">免费快检</h3>
+              <p className="mt-4 flex items-baseline gap-1">
+                <span className="text-4xl font-semibold tracking-tight">$0</span>
+              </p>
+              <dl className="mt-6 space-y-4 text-sm">
+                <div>
+                  <dt className="text-muted">分析</dt>
+                  <dd className="mt-1 leading-6">访客快检 / 注册后每月 1 次完整分析</dd>
+                </div>
+                <div>
+                  <dt className="text-muted">导出</dt>
+                  <dd className="mt-1 leading-6">受限（如前 10 行）</dd>
+                </div>
+              </dl>
+              <a href="#upload" className={`${btnPrimary} mt-8 w-full`}>
+                免费快检
+              </a>
+            </article>
+
+            <article className="flex h-full flex-col rounded-2xl border border-brand/30 bg-card bg-[linear-gradient(180deg,var(--brand-soft),transparent_8rem)] p-6 shadow-card sm:p-8">
+              <h3 className="text-lg font-semibold">Pro</h3>
+              <p className="mt-4 flex items-baseline gap-1">
+                <span className="text-4xl font-semibold tracking-tight">$29</span>
+                <span className="text-sm text-muted">/月</span>
+              </p>
+              <dl className="mt-6 space-y-4 text-sm">
+                <div>
+                  <dt className="text-muted">分析</dt>
+                  <dd className="mt-1 leading-6">多次完整分析</dd>
+                </div>
+                <div>
+                  <dt className="text-muted">导出</dt>
+                  <dd className="mt-1 leading-6">完整可导入否词表</dd>
+                </div>
+              </dl>
+              <button type="button" disabled title="即将开放" className={`${btnSecondary} mt-8 w-full`}>
+                $29/月 · 即将开放
+              </button>
+              <p className="mt-3 text-center text-xs leading-5 text-muted">
+                订阅支付即将开放。现在可以先做免费快检。
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="limits" className="scroll-mt-24 py-16 sm:py-20">
+        <div className="mx-auto w-full max-w-[1120px] px-5">
+          <p className="text-sm font-medium text-brand">范围</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight sm:text-3xl">明确不做</h2>
+          <ul className="mt-8 grid gap-3 sm:grid-cols-2">
+            {LIMITS.map((item) => (
+              <li
+                key={item}
+                className="flex items-start gap-3 rounded-2xl border border-line bg-card px-4 py-4 text-sm leading-6 shadow-card"
+              >
+                <span aria-hidden className="mt-0.5 font-medium text-muted">
+                  —
+                </span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
     </main>
   );
 }

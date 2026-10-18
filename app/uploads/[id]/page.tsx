@@ -18,6 +18,10 @@ import { REQUIRED_FIELDS } from "@/lib/str-columns";
 
 type Props = { params: Promise<{ id: string }> };
 
+export const metadata = {
+  title: "报告已接收",
+};
+
 export default async function UploadDetailPage({ params }: Props) {
   const { id } = await params;
   const meta = await getUploadMeta(id);
@@ -28,12 +32,9 @@ export default async function UploadDetailPage({ params }: Props) {
   const missing = new Set(meta.missing_required ?? []);
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-8 px-4 py-16">
+    <main id="main" className="mx-auto flex w-full max-w-[1120px] flex-1 flex-col gap-8 px-5 py-10">
       <div>
-        <Link
-          href="/"
-          className="text-sm text-emerald-600 hover:underline dark:text-emerald-400"
-        >
+        <Link href="/#upload" className="text-sm font-medium text-brand hover:underline">
           ← 再传一份
         </Link>
       </div>
@@ -42,16 +43,14 @@ export default async function UploadDetailPage({ params }: Props) {
         <h1 className="text-3xl font-semibold tracking-tight">
           报告已接收 · {meta.row_count.toLocaleString()} 行
         </h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
+        <p className="text-muted">
           文件：{meta.filename}（{(meta.bytes / 1024).toFixed(1)} KB）
         </p>
       </header>
 
-      <section className="rounded-xl border border-zinc-200 dark:border-zinc-800">
-        <h2 className="border-b border-zinc-200 px-4 py-3 text-sm font-medium dark:border-zinc-800">
-          报告列检查
-        </h2>
-        <ul className="divide-y divide-zinc-100 dark:divide-zinc-900">
+      <section className="overflow-hidden rounded-2xl border border-line bg-card shadow-card">
+        <h2 className="border-b border-line px-4 py-3 text-sm font-medium">报告列检查</h2>
+        <ul className="divide-y divide-line">
           {REQUIRED_FIELDS.map((field) => {
             const ok = Boolean(mapped[field]) && !missing.has(field);
             return (
@@ -61,11 +60,9 @@ export default async function UploadDetailPage({ params }: Props) {
               >
                 <span>{FIELD_LABEL_ZH[field] ?? field}</span>
                 {ok ? (
-                  <span className="text-emerald-600 dark:text-emerald-400">
-                    ✓ {mapped[field]}
-                  </span>
+                  <span className="text-brand">✓ {mapped[field]}</span>
                 ) : (
-                  <span className="text-red-600 dark:text-red-400">✗ 缺失</span>
+                  <span className="text-danger">✗ 缺失</span>
                 )}
               </li>
             );
@@ -75,7 +72,7 @@ export default async function UploadDetailPage({ params }: Props) {
             .map(([field, orig]) => (
               <li
                 key={field}
-                className="flex items-center justify-between gap-4 px-4 py-3 text-sm text-zinc-500"
+                className="flex items-center justify-between gap-4 px-4 py-3 text-sm text-muted"
               >
                 <span>{FIELD_LABEL_ZH[field] ?? field}</span>
                 <span>✓ {orig}</span>
@@ -85,7 +82,7 @@ export default async function UploadDetailPage({ params }: Props) {
       </section>
 
       {missing.size > 0 && (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+        <p className="rounded-xl border border-warn-line bg-warn-soft px-4 py-3 text-sm text-warn">
           报告缺少搜索词 / 点击 / 花费 / 订单等列，无法分析。请导出 Sponsored Products 的 Search Term Report。
         </p>
       )}

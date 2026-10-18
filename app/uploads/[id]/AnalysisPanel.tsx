@@ -122,27 +122,27 @@ export default function AnalysisPanel({
         <button
           onClick={() => run(job?.currency_source === "override" ? currency : undefined)}
           disabled={busy || !canAnalyze}
-          className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
+          className="inline-flex min-h-10 items-center rounded-lg bg-brand px-4 py-2 text-sm font-medium text-on-brand hover:bg-brand-strong disabled:opacity-50"
         >
           {busy ? "分析中…" : job ? "重新分析" : "开始分析"}
         </button>
       </div>
 
       {canAnalyze && !job && !busy && (
-        <p className="rounded-lg border border-dashed border-zinc-300 px-4 py-6 text-center text-sm text-zinc-500 dark:border-zinc-700">
+        <p className="rounded-xl border border-dashed border-line bg-card px-4 py-6 text-center text-sm text-muted">
           点「开始分析」，几秒内给出疑似浪费词和否词建议。
         </p>
       )}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       {job && job.currency_source === "default" && (
-        <div className="flex flex-wrap items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-warn-line bg-warn-soft px-4 py-3 text-sm text-warn">
           <span>未能从报告识别币种，金额按 USD（$）显示，阈值也按 USD 计算。如果报告是其他币种，请选择后重新分析：</span>
           <select
             aria-label="选择币种"
             value={rerunCurrency}
             onChange={(e) => setRerunCurrency(e.target.value as CurrencyCode)}
-            className="rounded border border-amber-300 bg-white px-2 py-1 text-xs dark:bg-zinc-900"
+            className="rounded border border-warn-line bg-card px-2 py-1 text-xs text-foreground"
           >
             {CURRENCY_CODES.map((c) => (
               <option key={c} value={c}>{c}</option>
@@ -152,14 +152,14 @@ export default function AnalysisPanel({
             type="button"
             onClick={() => run(rerunCurrency)}
             disabled={busy}
-            className="rounded border border-amber-400 px-2 py-1 text-xs hover:bg-amber-100 disabled:opacity-50"
+            className="rounded border border-warn-line bg-card px-2 py-1 text-xs text-foreground hover:bg-brand-soft disabled:opacity-50"
           >
             按此币种重新分析
           </button>
         </div>
       )}
       {job && job.currency_source === "override" && (
-        <p className="text-xs text-zinc-500">已按你选择的币种 {currency} 显示金额并计算阈值。</p>
+        <p className="text-xs text-muted">已按你选择的币种 {currency} 显示金额并计算阈值。</p>
       )}
 
       {job && (
@@ -171,20 +171,20 @@ export default function AnalysisPanel({
               ["否词候选", job.summary.candidate_count.toLocaleString()],
               ["疑似浪费花费", `${money(job.summary.total_spend_wasted)}（${job.summary.wasted_pct_of_spend}%）`, "按报告期内规则估算，非保证节省金额"],
             ].map(([k, v, sub]) => (
-              <div key={k} className="rounded-xl border border-zinc-200 p-3 dark:border-zinc-800">
-                <p className="text-xs text-zinc-500">{k}</p>
+              <div key={k} className="rounded-xl border border-line bg-card p-3 shadow-card">
+                <p className="text-xs text-muted">{k}</p>
                 <p className="mt-1 text-lg font-semibold">{v}</p>
-                {sub && <p className="mt-1 text-[11px] leading-tight text-zinc-400">{sub}</p>}
+                {sub && <p className="mt-1 text-[11px] leading-tight text-muted">{sub}</p>}
               </div>
             ))}
           </div>
 
           {job.candidates.length === 0 ? (
-            <p className="rounded-lg border border-zinc-200 px-4 py-6 text-center text-sm text-zinc-500 dark:border-zinc-800">按当前规则未发现明显浪费词。可换近 30–90 天的报告再试。</p>
+            <p className="rounded-xl border border-line bg-card px-4 py-6 text-center text-sm text-muted">按当前规则未发现明显浪费词。可换近 30–90 天的报告再试。</p>
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
+            <div className="overflow-x-auto rounded-xl border border-line bg-card shadow-card">
               <table className="w-full text-sm">
-                <thead className="bg-zinc-50 text-left text-xs text-zinc-500 dark:bg-zinc-900">
+                <thead className="bg-background text-left text-xs text-muted">
                   <tr>
                     <th className="px-3 py-2">
                       <input
@@ -205,7 +205,7 @@ export default function AnalysisPanel({
                     <th className="px-3 py-2">匹配</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-zinc-100 dark:divide-zinc-900">
+                <tbody className="divide-y divide-line">
                   {job.candidates.map((c) => (
                     <tr key={c.keyword} className={selected.has(c.keyword) ? "" : "opacity-50"}>
                       <td className="px-3 py-2">
@@ -213,7 +213,7 @@ export default function AnalysisPanel({
                       </td>
                       <td className="px-3 py-2 font-medium">{c.keyword}</td>
                       <td className="px-3 py-2">
-                        <span className="rounded bg-amber-100 px-2 py-0.5 text-xs text-amber-900 dark:bg-amber-900/40 dark:text-amber-100" title={reasonTooltip(c.reason, job.thresholds, currency)}>
+                        <span className="rounded bg-warn-soft px-2 py-0.5 text-xs text-warn" title={reasonTooltip(c.reason, job.thresholds, currency)}>
                           {c.reason_label_zh} <span aria-hidden className="opacity-60">ⓘ</span>
                         </span>
                       </td>
@@ -221,7 +221,7 @@ export default function AnalysisPanel({
                       <td className="px-3 py-2 text-right">{c.clicks}</td>
                       <td className="px-3 py-2 text-right">{c.impressions.toLocaleString()}</td>
                       <td className="px-3 py-2 text-right">{c.orders}</td>
-                      <td className="px-3 py-2 text-xs text-zinc-500">Negative Exact</td>
+                      <td className="px-3 py-2 text-xs text-muted">Negative Exact</td>
                     </tr>
                   ))}
                 </tbody>
@@ -230,14 +230,14 @@ export default function AnalysisPanel({
           )}
 
           {job.candidates.length > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-zinc-200 px-4 py-3 dark:border-zinc-800">
-              <div className="space-y-1 text-sm text-zinc-600 dark:text-zinc-400">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-line bg-card px-4 py-3 shadow-card">
+              <div className="space-y-1 text-sm text-muted">
                 <p>已勾选 {selected.size} 个，疑似浪费 {money(selectedWasted)}。</p>
-                <p className="text-xs text-zinc-500">
+                <p className="text-xs text-muted">
                   导出的否词表仅含 Negative Exact（Keyword Text + Match Type），不区分广告活动。建议先导入浪费最多的那个广告活动试用；如果某个词在其他活动里出过单，就别在那里否定。
                 </p>
                 {!exportGate.paid && selected.size > exportGate.freeLimit && (
-                  <p className="text-xs text-amber-700 dark:text-amber-300">
+                  <p className="text-xs text-warn">
                     免费版可导出疑似浪费最高的前 {exportGate.freeLimit} 个。完整可导入否词表需 $29/月订阅。
                   </p>
                 )}
@@ -246,7 +246,7 @@ export default function AnalysisPanel({
                 type="button"
                 onClick={exportCsv}
                 disabled={exporting || selected.size === 0}
-                className="rounded-lg bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-100 dark:text-zinc-900"
+                className="inline-flex min-h-10 items-center rounded-lg bg-brand px-4 py-2 text-sm font-medium text-on-brand hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {exporting ? "导出中…" : `导出否词表（${selected.size}）`}
               </button>
@@ -254,12 +254,12 @@ export default function AnalysisPanel({
           )}
 
           {exportMsg && (
-            <div className="space-y-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100">
+            <div className="space-y-2 rounded-xl border border-brand/30 bg-brand-soft px-4 py-3 text-sm text-foreground">
               <p>{exportMsg.ok}</p>
               {exportMsg.gated && (
-                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-emerald-200 pt-2 dark:border-emerald-900">
-                  <p className="text-amber-800 dark:text-amber-200">{exportMsg.gated}</p>
-                  <button type="button" disabled title="即将开放" className="cursor-not-allowed rounded-lg border border-amber-400 px-3 py-1.5 text-xs text-amber-700 opacity-70">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-2">
+                  <p className="text-warn">{exportMsg.gated}</p>
+                  <button type="button" disabled title="即将开放" className="cursor-not-allowed rounded-lg border border-warn-line px-3 py-1.5 text-xs text-warn opacity-70">
                     $29/月 解锁完整导出 · 即将开放
                   </button>
                 </div>
@@ -268,11 +268,11 @@ export default function AnalysisPanel({
           )}
 
           {(job.summary.skipped_asin?.count ?? 0) > 0 && (
-            <p className="text-xs text-zinc-500">
+            <p className="text-xs text-muted">
               另有 {job.summary.skipped_asin.count} 个 ASIN 形式的搜索词（疑似浪费 {money(job.summary.skipped_asin.spend_wasted)}）未列入：这类流量来自商品投放，需用「否定商品投放」处理，否定关键词拦不住。
             </p>
           )}
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-muted">
             出单 ≥ {job.thresholds.min_orders_protected ?? 2} 的搜索词不会建议否定；ACOS 偏高时建议降低竞价。
           </p>
         </>
