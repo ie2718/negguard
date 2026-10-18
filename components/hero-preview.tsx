@@ -1,8 +1,8 @@
 const ROWS = [
-  ["free replacement filter", "¥4,280"],
-  ["how to install filter", "¥3,150"],
-  ["used water filter", "¥2,640"],
-  ["filter manual pdf", "¥2,410"],
+  ["free replacement filter", "$4,280"],
+  ["how to install filter", "$3,150"],
+  ["used water filter", "$2,640"],
+  ["filter manual pdf", "$2,410"],
 ] as const;
 
 export function HeroPreview() {
@@ -14,7 +14,7 @@ export function HeroPreview() {
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-sm text-muted">疑似浪费</p>
-              <p className="mt-1 text-4xl font-semibold tabular-nums tracking-tight">¥12,480</p>
+              <p className="mt-1 text-4xl font-semibold tabular-nums tracking-tight">$12,480</p>
               <p className="mt-2 text-xs leading-5 text-muted">按报告期内规则估算，非保证节省</p>
             </div>
             <div className="rounded-xl bg-brand-soft px-3 py-2 text-right">
